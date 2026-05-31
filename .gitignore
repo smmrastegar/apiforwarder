@@ -1,0 +1,29 @@
+# .NET build output
+bin/
+obj/
+publish/
+out/
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Rider
+.idea/
+
+# Runtime data (route store) — keep example, ignore live data
+src/ApiForwarder/App_Data/routes.json
+**/App_Data/routes.json
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# GitHub Actions self-hosted runner (if installed inside repo dir)
+actions-runner/

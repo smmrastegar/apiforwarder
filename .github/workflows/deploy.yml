@@ -1,0 +1,48 @@
+name: Deploy to IIS
+
+# Auto-deploys on every push to the development branch. The job runs on a
+# self-hosted GitHub Actions runner that you install on the Windows/IIS server
+# (see deploy/install-runner.ps1). When you push, the runner builds the app and
+# swaps it into the live IIS site — no manual step required.
+
+on:
+  push:
+    branches:
+      - claude/http-forwarder-ui-VVsZF
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-iis
+  cancel-in-progress: false
+
+env:
+  # These can be overridden with repository/environment variables of the same name.
+  IIS_SITE_PATH: ${{ vars.IIS_SITE_PATH || 'C:\inetpub\apiforwarder' }}
+  IIS_APP_POOL: ${{ vars.IIS_APP_POOL || 'apiforwarder' }}
+
+jobs:
+  build-deploy:
+    runs-on: [self-hosted, windows]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore src/ApiForwarder/ApiForwarder.csproj
+
+      - name: Publish
+        run: dotnet publish src/ApiForwarder/ApiForwarder.csproj -c Release -o ${{ github.workspace }}\publish --no-restore
+
+      - name: Deploy to IIS
+        shell: powershell
+        run: |
+          .\deploy\deploy.ps1 `
+            -PublishDir "${{ github.workspace }}\publish" `
+            -SitePath "${{ env.IIS_SITE_PATH }}" `
+            -AppPool "${{ env.IIS_APP_POOL }}"

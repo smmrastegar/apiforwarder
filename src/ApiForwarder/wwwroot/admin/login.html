@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>ورود — API Forwarder</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="card login-card">
+      <h1>API Forwarder</h1>
+      <p class="muted">برای مدیریت ریکوست‌ها وارد شوید</p>
+      <form id="loginForm">
+        <label for="username">نام کاربری</label>
+        <input id="username" type="text" autocomplete="username" required />
+        <label for="password">رمز عبور</label>
+        <input id="password" type="password" autocomplete="current-password" required />
+        <div class="error" id="error"></div>
+        <button class="btn" type="submit" style="width:100%; margin-top:8px;">ورود</button>
+      </form>
+    </div>
+  </div>
+  <script src="login.js"></script>
+</body>
+</html>

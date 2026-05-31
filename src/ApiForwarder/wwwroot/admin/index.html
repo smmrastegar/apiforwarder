@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>API Forwarder — مدیریت</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <h1>🔀 API Forwarder</h1>
+    <div class="right">
+      <span class="muted" id="whoami"></span>
+      <button class="btn small secondary" id="infoBtn">اطلاعات سرور</button>
+      <button class="btn small secondary" id="logoutBtn">خروج</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h2 style="margin:0 0 4px;">ریکوست فورواردرها</h2>
+          <p class="muted" style="margin:0;">کلاینت‌ها فقط آدرس عمومی را می‌بینند؛ مقصد واقعی مخفی می‌ماند.</p>
+        </div>
+        <button class="btn" id="addBtn">+ افزودن قانون</button>
+      </div>
+      <div id="serverInfo" class="hint" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>وضعیت</th>
+            <th>نام</th>
+            <th>مسیر عمومی</th>
+            <th>مقصد (مخفی)</th>
+            <th>گزینه‌ها</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="rulesBody">
+          <tr><td colspan="6" class="muted">در حال بارگذاری…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Edit/Create modal -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal">
+      <h2 id="modalTitle">افزودن قانون</h2>
+      <input type="hidden" id="ruleId" />
+      <div class="row">
+        <div>
+          <label for="name">نام</label>
+          <input id="name" type="text" placeholder="مثلاً GitHub API" />
+        </div>
+        <div>
+          <label for="pathPrefix">مسیر عمومی (Path Prefix)</label>
+          <input id="pathPrefix" type="text" placeholder="/github" dir="ltr" />
+          <div class="hint">کلاینت با این مسیر صدا می‌زند: https://api.lto.bz<span id="prefixPreview">/github</span></div>
+        </div>
+      </div>
+      <label for="destination">آدرس مقصد واقعی (مخفی می‌ماند)</label>
+      <input id="destination" type="text" placeholder="https://api.github.com" dir="ltr" />
+
+      <div class="checks">
+        <label class="check"><input type="checkbox" id="enabled" checked /> فعال</label>
+        <label class="check"><input type="checkbox" id="stripPrefix" checked /> حذف Prefix هنگام فوروارد</label>
+        <label class="check"><input type="checkbox" id="hideOrigin" checked /> مخفی‌سازی کلاینت (IP سرور دیده شود)</label>
+        <label class="check"><input type="checkbox" id="useDestHost" checked /> استفاده از Host مقصد</label>
+      </div>
+
+      <label for="methods">متدهای مجاز (اختیاری، با کاما)</label>
+      <input id="methods" type="text" placeholder="GET, POST" dir="ltr" />
+
+      <label for="headers">هدرهای اضافی (هر خط: Name: Value)</label>
+      <textarea id="headers" dir="ltr" placeholder="Authorization: Bearer xxx&#10;X-Api-Key: abc"></textarea>
+
+      <div class="error" id="modalError"></div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="cancelBtn">انصراف</button>
+        <button class="btn" id="saveBtn">ذخیره</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
