@@ -31,7 +31,7 @@ function Test-Admin {
 }
 if (-not (Test-Admin)) { throw "Please run this script as Administrator." }
 
-Write-Host "==> Enabling IIS features…"
+Write-Host "==> Enabling IIS features..."
 $features = @(
     "IIS-WebServerRole","IIS-WebServer","IIS-CommonHttpFeatures","IIS-StaticContent",
     "IIS-DefaultDocument","IIS-HttpErrors","IIS-RequestFiltering","IIS-HttpLogging",
@@ -59,7 +59,7 @@ Set-ItemProperty "IIS:\AppPools\$AppPool" -Name managedRuntimeVersion -Value ""
 Set-ItemProperty "IIS:\AppPools\$AppPool" -Name startMode -Value "AlwaysRunning"
 Set-ItemProperty "IIS:\AppPools\$AppPool" -Name processModel.idleTimeout -Value "00:00:00"
 
-Write-Host "==> Creating website: $SiteName ($HostName:$Port)"
+Write-Host "==> Creating website: $SiteName (${HostName}:$Port)"
 if (Test-Path "IIS:\Sites\$SiteName") {
     Set-ItemProperty "IIS:\Sites\$SiteName" -Name physicalPath -Value $SitePath
     Set-ItemProperty "IIS:\Sites\$SiteName" -Name applicationPool -Value $AppPool
@@ -73,7 +73,7 @@ try {
     New-WebBinding -Name $SiteName -Protocol http -Port $Port -IPAddress "*" -HostHeader "" -ErrorAction SilentlyContinue
 } catch {}
 
-Write-Host "==> Granting permissions to the app pool identity…"
+Write-Host "==> Granting permissions to the app pool identity..."
 $identity = "IIS AppPool\$AppPool"
 $acl = Get-Acl $SitePath
 $rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
@@ -87,7 +87,7 @@ Write-Host "    Next steps:"
 Write-Host "      1) Install the .NET 8 Hosting Bundle if you haven't:"
 Write-Host "         https://dotnet.microsoft.com/download/dotnet/8.0 (Hosting Bundle)"
 Write-Host "      2) Install the GitHub Actions runner: .\deploy\install-runner.ps1"
-Write-Host "      3) Push to the repo — the app will build & deploy automatically."
+Write-Host "      3) Push to the repo - the app will build and deploy automatically."
 Write-Host ""
 Write-Host "    Cloudflare: point api.lto.bz (proxied) to this server's public IP."
 Write-Host "    For TLS, use a Cloudflare Origin Certificate + an https binding on 443,"

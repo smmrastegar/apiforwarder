@@ -23,7 +23,7 @@ if (-not (Test-Path $SitePath))   { New-Item -ItemType Directory -Path $SitePath
 
 # 1) Tell ASP.NET Core Module to gracefully take the app offline.
 $offline = Join-Path $SitePath "app_offline.htm"
-Set-Content -Path $offline -Value "<h1>در حال بروزرسانی… Updating…</h1>" -Encoding UTF8
+Set-Content -Path $offline -Value "<h1>Updating... please wait</h1>" -Encoding UTF8
 
 # 2) Stop the app pool so files are unlocked.
 if (Get-Item "IIS:\AppPools\$AppPool" -ErrorAction SilentlyContinue) {
@@ -38,9 +38,9 @@ if (Get-Item "IIS:\AppPools\$AppPool" -ErrorAction SilentlyContinue) {
 
 # 3) Mirror the new build over the site, but keep runtime data and logs.
 #    /XD excludes directories so the live routes.json and logs survive deploys.
-$robolog = robocopy $PublishDir $SitePath /MIR /NFL /NDL /NJH /NJS /NP `
+robocopy $PublishDir $SitePath /MIR /NFL /NDL /NJH /NJS /NP `
     /XD (Join-Path $SitePath "App_Data") (Join-Path $SitePath "logs") `
-    /XF "app_offline.htm"
+    /XF "app_offline.htm" | Out-Null
 # robocopy exit codes 0-7 are success; >=8 is a real failure.
 if ($LASTEXITCODE -ge 8) { throw "robocopy failed with exit code $LASTEXITCODE" }
 $global:LASTEXITCODE = 0

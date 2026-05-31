@@ -37,7 +37,7 @@ New-Item -ItemType Directory -Path $RunnerDir -Force | Out-Null
 Set-Location $RunnerDir
 
 # Resolve the latest runner release version from GitHub.
-Write-Host "==> Finding latest runner version…"
+Write-Host "==> Finding latest runner version..."
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $release = Invoke-RestMethod -Uri "https://api.github.com/repos/actions/runner/releases/latest" `
     -Headers @{ "User-Agent" = "apiforwarder-setup" }
@@ -48,13 +48,13 @@ $url = "https://github.com/actions/runner/releases/download/v$version/$zip"
 if (-not (Test-Path (Join-Path $RunnerDir "config.cmd"))) {
     Write-Host "==> Downloading $url"
     Invoke-WebRequest -Uri $url -OutFile (Join-Path $RunnerDir $zip)
-    Write-Host "==> Extracting…"
+    Write-Host "==> Extracting..."
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     [System.IO.Compression.ZipFile]::ExtractToDirectory((Join-Path $RunnerDir $zip), $RunnerDir)
     Remove-Item (Join-Path $RunnerDir $zip) -Force
 }
 
-Write-Host "==> Configuring runner…"
+Write-Host "==> Configuring runner..."
 & "$RunnerDir\config.cmd" --unattended --url $RepoUrl --token $Token `
     --name $RunnerName --labels $Labels --runasservice --replace
 
