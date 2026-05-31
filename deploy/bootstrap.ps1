@@ -33,11 +33,18 @@ param(
     [int]   $Port       = 80,
     [string]$AdminUser  = "smmr",
     [string]$AdminPassword = "",   # if empty, you'll be prompted (kept out of logs)
-    [string]$RunnerToken = ""      # if provided, installs the auto-deploy runner
+    [string]$RunnerToken = "",     # if provided, installs the auto-deploy runner
+    [string]$Token = ""            # GitHub PAT (repo:read) for cloning a PRIVATE repo
 )
 
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+# For a private repo, build an authenticated clone URL from the PAT.
+$CloneUrl = $RepoUrl
+if (-not [string]::IsNullOrWhiteSpace($Token)) {
+    $CloneUrl = $RepoUrl -replace '^https://', "https://x-access-token:$Token@"
+}
 
 function Assert-Admin {
     $id = [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -125,12 +132,18 @@ Import-Module WebAdministration -ErrorAction SilentlyContinue
 Write-Step "دریافت سورس از گیت‌هاب"
 if (Test-Path (Join-Path $SrcDir ".git")) {
     Write-Host "ریپو موجود است؛ به‌روزرسانی…"
+    git -C $SrcDir remote set-url origin $CloneUrl
     git -C $SrcDir fetch origin $Branch
     git -C $SrcDir checkout $Branch
     git -C $SrcDir reset --hard "origin/$Branch"
+    # Don't leave the token sitting in .git/config.
+    git -C $SrcDir remote set-url origin $RepoUrl
 } else {
     New-Item -ItemType Directory -Path (Split-Path $SrcDir) -Force | Out-Null
-    git clone --branch $Branch $RepoUrl $SrcDir
+    git clone --branch $Branch $CloneUrl $SrcDir
+    if (Test-Path (Join-Path $SrcDir ".git")) {
+        git -C $SrcDir remote set-url origin $RepoUrl
+    }
 }
 
 # 5) ------------------------------------------------- IIS site + pool -------
