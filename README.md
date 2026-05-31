@@ -34,7 +34,33 @@
 
 ---
 
-## 🚀 راه‌اندازی روی سرور (یک‌بار)
+## ⚡ راه‌اندازی سریع (یک خط — پیشنهادی)
+
+روی سرور با **RDP** وارد شوید، یک **PowerShell با دسترسی Administrator** باز کنید و این را اجرا کنید:
+
+```powershell
+irm https://raw.githubusercontent.com/smmrastegar/apiforwarder/claude/http-forwarder-ui-VVsZF/deploy/bootstrap.ps1 | iex
+```
+
+این اسکریپت همه‌چیز را خودکار انجام می‌دهد: نصب **.NET 8 Hosting Bundle**، فعال‌سازی **IIS**،
+ساخت سایت/App Pool، کلون سورس، اولین **build & deploy** و گرفتن رمز پنل ادمین. در پایان آدرس
+پنل را نشان می‌دهد.
+
+برای اینکه **دیپلوی خودکار** (با هر `git push`) هم در همان اجرا نصب شود، اول یک
+**registration token** از مسیر `repo → Settings → Actions → Runners → New self-hosted runner → Windows`
+بگیرید، بعد:
+
+```powershell
+$b = "https://raw.githubusercontent.com/smmrastegar/apiforwarder/claude/http-forwarder-ui-VVsZF/deploy/bootstrap.ps1"
+irm $b -OutFile $env:TEMP\bootstrap.ps1
+& $env:TEMP\bootstrap.ps1 -RunnerToken "<TOKEN>"
+```
+
+> اگر می‌خواهید مرحله‌به‌مرحله و دستی پیش بروید، بخش زیر را دنبال کنید.
+
+---
+
+## 🚀 راه‌اندازی دستی روی سرور (یک‌بار)
 
 > همه‌ی دستورها در **PowerShell با دسترسی Administrator** اجرا شوند.
 
@@ -133,6 +159,7 @@ src/ApiForwarder/
   wwwroot/admin/             # رابط کاربری (HTML/CSS/JS، فارسی/RTL)
   web.config                 # میزبانی IIS
 deploy/
+  bootstrap.ps1              # راه‌اندازی کامل و یک‌خطی روی سرور (پیشنهادی)
   setup-iis.ps1              # ساخت سایت و App Pool روی IIS
   install-runner.ps1         # نصب GitHub Actions runner
   deploy.ps1                 # انتشار build روی سایت (با حفظ داده)
