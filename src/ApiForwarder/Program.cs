@@ -16,6 +16,10 @@ var builder = WebApplication.CreateBuilder(args);
 var adminUser = builder.Configuration["Admin:Username"] ?? "admin";
 var adminPass = builder.Configuration["Admin:Password"] ?? "change-me";
 
+// Optional: force all outbound (proxied) requests to leave from this local IP.
+// Set via appsettings ("Outbound:BindIp") or env var Outbound__BindIp.
+var outboundBindIp = builder.Configuration["Outbound:BindIp"];
+
 // ---------------------------------------------------------------------------
 // Services
 // ---------------------------------------------------------------------------
@@ -35,7 +39,33 @@ builder.Services.AddSingleton<IProxyConfigProvider>(sp => sp.GetRequiredService<
 builder.Services.AddSingleton<RouteStore>();
 builder.Services.AddHttpClient("outbound-ip");
 
-builder.Services.AddReverseProxy();
+var proxyBuilder = builder.Services.AddReverseProxy();
+
+// If a bind IP is configured, pin the outbound socket to it so every forwarded
+// request leaves the server from exactly that address (e.g. 95.38.132.5).
+if (!string.IsNullOrWhiteSpace(outboundBindIp) &&
+    IPAddress.TryParse(outboundBindIp, out var bindAddress))
+{
+    proxyBuilder.ConfigureHttpClient((_, handler) =>
+    {
+        handler.ConnectCallback = async (context, cancellationToken) =>
+        {
+            var socket = new Socket(SocketType.Stream, ProtocolType.Tcp) { NoDelay = true };
+            // Bind to the chosen local IP (port 0 = let the OS pick an ephemeral port).
+            socket.Bind(new IPEndPoint(bindAddress, 0));
+            try
+            {
+                await socket.ConnectAsync(context.DnsEndPoint, cancellationToken);
+                return new NetworkStream(socket, ownsSocket: true);
+            }
+            catch
+            {
+                socket.Dispose();
+                throw;
+            }
+        };
+    });
+}
 
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
